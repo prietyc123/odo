@@ -2,9 +2,12 @@ package util
 
 import (
 	"encoding/json"
+	"log"
+
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
@@ -36,7 +39,6 @@ type FileData struct {
 	Size             int64
 	LastModifiedDate time.Time
 }
-
 // read tries to read the odo index file from the given location and returns the data from the file
 // if no such file is present, it means the folder hasn't been walked and thus returns a empty list
 func readFileIndex(filePath string) (*FileIndex, error) {
@@ -172,6 +174,41 @@ func RunIndexer(directory string, ignoreRules []string) (filesChanged []string, 
 			return filesChanged, filesDeleted, err
 		}
 	}
+
+	// Check .gitignore file exists or not
+	// Add odo-file-index.json entry to .gitignore
+
+	_, err = os.Stat(filepath.Join(filepath.Dir(directory), ".gitignore"))
+
+	if err == nil {
+		file, err := os.OpenFile(filepath.Join(filepath.Dir(directory), ".gitignore"), os.O_APPEND|os.O_RDWR,0600)
+		if err != nil {
+			log.Fatalf("failed opening file: %s", err)
+		}
+		defer file.Close()
+
+		data, err := ioutil.ReadFile(filepath.Join(filepath.Dir(directory), ".gitignore"))
+		if err != nil {
+			log.Panicf("failed reading data from file: %s", err)
+		}else {
+			s := string(data)
+			if strings.Contains(s, resolvedPath){}else {
+				if _, err = file.WriteString("\n" + resolvedPath); err != nil {
+					log.Panicf("failed writing string to file: %s", err)
+				}
+			}
+		}
+	}else if os.IsNotExist(err){
+		file, err := os.OpenFile(filepath.Join(filepath.Dir(directory), ".gitignore"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Fatalf("failed opening file: %s", err)
+		}
+		defer file.Close()
+
+		if _, err = file.WriteString("\n" + resolvedPath); err != nil {
+			log.Panicf("failed writing string to file: %s", err)
+		}
+	}else{}
 
 	return filesChanged, filesDeleted, nil
 }
