@@ -9,7 +9,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var _ = Describe("odo project command tests", func() {
+var _ = Describe("[rfe_id:100][crit:medium][vendor:cnv-qe@redhat.com][level:component]odo project command tests", func() {
 	var commonVar helper.CommonVar
 
 	// This is run before every Spec (It)
@@ -23,12 +23,12 @@ var _ = Describe("odo project command tests", func() {
 		helper.CommonAfterEach(commonVar)
 	})
 
-	It("should display machine ouptut when getting help for odo project list", func() {
+	It("should display machine ouptut when getting help for odo project list [test_id:1000]", func() {
 		output := helper.Cmd("odo", "project", "list", "--help").ShouldPass().Out()
 		Expect(output).To(ContainSubstring("Specify output format, supported format: json"))
 	})
 
-	It("should be able to get project", func() {
+	It("should be able to get project [test_id:1001]", func() {
 		projectGetJSON := helper.Cmd("odo", "project", "get", "-o", "json").ShouldPass().Out()
 		getOutputJSON, err := helper.Unindented(projectGetJSON)
 		Expect(err).Should(BeNil())
@@ -38,17 +38,17 @@ var _ = Describe("odo project command tests", func() {
 
 	})
 
-	It("should display the help of project command", func() {
+	It("should display the help of project command [test_id:1002]", func() {
 		projectHelp := helper.Cmd("odo", "project", "-h").ShouldPass().Out()
 		Expect(projectHelp).To(ContainSubstring("Perform project operations"))
 	})
 
-	It("should display only the project name when running command with -q flag", func() {
+	It("should display only the project name when running command with -q flag [test_id:1003]", func() {
 		projectName := helper.Cmd("odo", "project", "get", "-q").ShouldPass().Out()
 		Expect(projectName).Should(Equal(commonVar.Project))
 	})
 
-	It("should list current empty project in json format", func() {
+	It("should list current empty project in json format [test_id:1004]", func() {
 		projectListJSON := helper.Cmd("odo", "project", "list", "-o", "json").ShouldPass().Out()
 		listOutputJSON, err := helper.Unindented(projectListJSON)
 		Expect(err).Should(BeNil())
@@ -57,7 +57,7 @@ var _ = Describe("odo project command tests", func() {
 		Expect(listOutputJSON).To(ContainSubstring(partOfProjectListJSON))
 	})
 
-	It("should list current empty project", func() {
+	It("should list current empty project [test_id:1005]", func() {
 		helper.WaitForCmdOut("odo", []string{"project", "list"}, 1, true, func(output string) bool {
 			return strings.Contains(output, commonVar.Project)
 		})
@@ -71,7 +71,7 @@ var _ = Describe("odo project command tests", func() {
 			helper.Cmd("odo", "project", "create", projectName).ShouldPass()
 		})
 
-		It("should delete a project with --wait", func() {
+		It("should delete a project with --wait [test_id:1006]", func() {
 			output := helper.Cmd("odo", "project", "delete", projectName, "-f", "--wait").ShouldPass().Out()
 			Expect(output).To(ContainSubstring("Waiting for project to be deleted"))
 		})
@@ -85,7 +85,7 @@ var _ = Describe("odo project command tests", func() {
 			helper.Cmd("odo", "project", "create", projectName, "-o", "json").ShouldPass()
 		})
 
-		It("should delete project and show output in json format", func() {
+		It("should delete project and show output in json format [test_id:1007]", func() {
 			actual := helper.Cmd("odo", "project", "delete", projectName, "-o", "json").ShouldPass().Out()
 			values := gjson.GetMany(actual, "kind", "message")
 			expected := []string{"Project", "Deleted project :"}
